@@ -9,6 +9,7 @@ public class ChatClient extends Frame{
 	TextField tf = new TextField();
 	TextArea ta = new TextArea();
 	Socket s;
+	DataOutputStream dos;
 	
 	public static void main(String[] args){
 		new ChatClient().launchFrame();
@@ -23,6 +24,7 @@ public class ChatClient extends Frame{
 		this.addWindowListener(new WindowAdapter(){
 			@Override
 			public void windowClosing(WindowEvent arg0) {
+				disconnect();
 				System.exit(0);
 			}
 			
@@ -35,11 +37,21 @@ public class ChatClient extends Frame{
 	public void connect(){
 		try {
 			s = new Socket("127.0.0.1",8888);
+			dos = new DataOutputStream(s.getOutputStream());
 			System.out.println("Connected to server");
 		} catch (UnknownHostException e) {
 			System.out.println("Cannot fing server!");
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void disconnect(){
+		try{
+			dos.close();
+			s.close();
+		} catch (IOException e){
 			e.printStackTrace();
 		}
 	}
@@ -51,8 +63,8 @@ public class ChatClient extends Frame{
 			ta.setText(str);
 			tf.setText("");
 			try {
-				DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 				dos.writeUTF(str);
+				dos.flush();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
