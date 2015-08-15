@@ -2,12 +2,13 @@ package com.linkui.chat;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 
 public class ChatClient extends Frame{
 	TextField tf = new TextField();
 	TextArea ta = new TextArea();
+	Socket s;
 	
 	public static void main(String[] args){
 		new ChatClient().launchFrame();
@@ -33,7 +34,7 @@ public class ChatClient extends Frame{
 	
 	public void connect(){
 		try {
-			Socket s = new Socket("127.0.0.1",8888);
+			s = new Socket("127.0.0.1",8888);
 			System.out.println("Connected to server");
 		} catch (UnknownHostException e) {
 			System.out.println("Cannot fing server!");
@@ -46,9 +47,15 @@ public class ChatClient extends Frame{
 	private class TFListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String s = tf.getText().trim();
-			ta.setText(s);
+			String str = tf.getText().trim();
+			ta.setText(str);
 			tf.setText("");
+			try {
+				DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+				dos.writeUTF(str);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 		
 	}
