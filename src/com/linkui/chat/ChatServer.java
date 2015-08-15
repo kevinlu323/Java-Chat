@@ -6,23 +6,41 @@ import java.net.*;
 public class ChatServer {
 	public static void main(String[] args){
 		boolean started = false;
+		ServerSocket ss = null;
+		Socket s = null;
+		DataInputStream dis = null;
 		try {
-			ServerSocket ss = new ServerSocket(8888);
+			ss = new ServerSocket(8888);
+		} catch (BindException e){
+			System.out.println("Port is in use by others");
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+		try{
 			started = true;
 			while(started){
 				boolean isConnected = false;
-				Socket s = ss.accept();
+				s = ss.accept();
 				isConnected = true;
 				System.out.println("A client is connected");
-				DataInputStream dis = new DataInputStream(s.getInputStream());
+				dis = new DataInputStream(s.getInputStream());
 				while(isConnected){
 					String str = dis.readUTF();
 					System.out.println(str);
 				}
-				dis.close();
 			}
-		} catch (IOException e) {
+		} catch (EOFException e) {
+			System.out.println("Client is disconnected.");
+		} catch (IOException e){
 			e.printStackTrace();
+		} finally {
+			try{
+				if(dis != null) dis.close();
+				if(s != null) s.close();
+			}
+			catch (IOException e1){
+				e1.printStackTrace();
+			}
 		}
 	}
 }
