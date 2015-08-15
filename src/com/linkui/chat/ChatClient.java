@@ -2,6 +2,8 @@ package com.linkui.chat;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.net.*;
 
 public class ChatClient extends Frame{
 	TextField tf = new TextField();
@@ -26,6 +28,19 @@ public class ChatClient extends Frame{
 		});
 		tf.addActionListener(new TFListener());
 		this.setVisible(true);
+		this.connect();
+	}
+	
+	public void connect(){
+		try {
+			Socket s = new Socket("127.0.0.1",8888);
+			System.out.println("Connected to server");
+		} catch (UnknownHostException e) {
+			System.out.println("Cannot fing server!");
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private class TFListener implements ActionListener{
