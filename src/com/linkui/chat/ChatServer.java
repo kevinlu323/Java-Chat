@@ -64,6 +64,9 @@ public class ChatServer {
 		public void send(String sentStr) {
 			try {
 				dos.writeUTF(sentStr);
+			} catch (SocketException e){
+				clients.remove(this);
+				System.out.println("A client is exit");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
