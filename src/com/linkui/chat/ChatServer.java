@@ -2,11 +2,13 @@ package com.linkui.chat;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 public class ChatServer {
 	boolean started = false;
 	ServerSocket ss = null;
 	Socket s = null;
+	List<Client> clients = new ArrayList<>();
 	
 	public static void main(String[] args){
 		new ChatServer().start();
@@ -29,6 +31,7 @@ public class ChatServer {
 				System.out.println("A client is connected");
 				Client c = new Client(s);
 				new Thread(c).start();
+				clients.add(c);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
@@ -44,13 +47,23 @@ public class ChatServer {
 	class Client implements Runnable{
 		private Socket s = null;
 		private DataInputStream dis = null;
+		private DataOutputStream dos = null;
 		private boolean isConnected = false;
 		
 		Client (Socket s){
 			this.s = s;
 			try {
 				dis = new DataInputStream(s.getInputStream());
+				dos = new DataOutputStream(s.getOutputStream());
 				isConnected = true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public void send(String sentStr){
+			try {
+				dos.writeUTF(sentStr);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -62,6 +75,10 @@ public class ChatServer {
 			while(isConnected){
 				String str = dis.readUTF();
 				System.out.println(str);
+				//Will not use Iterator here, Object lock is not needed.
+				for (int i = 0; i < clients.size(); i++){
+					clients.get(i).send(str);
+				}
 			}
 			} catch (EOFException e) {
 				System.out.println("Client is disconnected.");
@@ -70,6 +87,7 @@ public class ChatServer {
 			} finally {
 				try{
 					if(dis != null) dis.close();
+					if(dos != null) dos.close();
 					if(s != null) s.close();
 				}
 				catch (IOException e1){
